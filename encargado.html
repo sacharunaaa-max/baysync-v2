@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>BaySync V2 · Almacén</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:#0f0f1a;color:#fff;display:flex;flex-direction:column;
+  user-select:none;-webkit-user-select:none;touch-action:manipulation
+}
+
+.header{background:#1a1a2e;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px}
+.header .brand{font-size:16px;font-weight:700;text-align:center}
+.header .brand span{color:#7c4dff}
+.logo-hdr{height:26px;opacity:.7;flex-shrink:0}
+.logo-hdr.intergamma{height:24px}
+.conn-stat{display:flex;align-items:center;gap:4px;font-size:10px;color:#888}
+.status-dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.status-dot.online{background:#00e676;box-shadow:0 0 4px #00e676}
+.status-dot.offline{background:#ff5252}
+
+.content{flex:1;overflow-y:auto;padding:10px}
+
+.empty-state{text-align:center;padding:60px 20px;color:#555;font-size:14px;line-height:1.6}
+.empty-state .icon{font-size:40px;margin-bottom:10px}
+
+.truck-card{background:#1e1e36;border-radius:12px;padding:12px 14px;margin-bottom:8px;border-left:4px solid #7c4dff;max-width:500px;margin-left:auto;margin-right:auto}
+.truck-card .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.truck-card .id{font-size:20px;font-weight:800;color:#7c4dff}
+.truck-card .door{font-size:13px;color:#aaa;font-weight:600}
+.truck-card .prov{font-size:11px;color:#888;margin-bottom:6px;line-height:1.4}
+.truck-card .time{font-size:10px;color:#666}
+.truck-card .btn-open{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;background:#7c4dff;color:#fff;cursor:pointer;transition:opacity .12s;margin-top:6px}
+.truck-card .btn-open:active{opacity:.7}
+
+.truck-card.completed{border-left-color:#00e676;opacity:.7}
+.truck-card.completed .id{color:#00e676}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:100;align-items:center;justify-content:center;padding:10px}
+.modal-overlay.show{display:flex}
+.modal{background:#1e1e36;border-radius:14px;padding:16px;max-width:450px;width:100%;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:15px;color:#7c4dff;margin-bottom:8px}
+.close-modal{float:right;background:0;border:none;color:#888;font-size:24px;cursor:pointer;line-height:1}
+
+/* Supplier section in modal */
+.prov-section{background:#141428;border-radius:10px;padding:10px;margin-bottom:8px}
+.prov-section h4{font-size:13px;color:#fff;margin-bottom:6px}
+.prov-section .dir-row{display:flex;gap:6px;margin-bottom:6px}
+.dir-btn{flex:1;padding:6px;border-radius:6px;border:1px solid #333;background:0;color:#888;font-size:11px;font-weight:600;cursor:pointer}
+.dir-btn.active{background:#7c4dff22;border-color:#7c4dff;color:#7c4dff}
+
+.qty-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.qty-item{background:#1e1e36;border-radius:8px;padding:6px 4px;text-align:center}
+.qty-item label{display:block;font-size:8px;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+.qty-item input{width:100%;padding:6px;border-radius:6px;border:1px solid #333;background:#0f0f1a;color:#fff;font-size:16px;font-weight:700;text-align:center;outline:none}
+.qty-item input:focus{border-color:#7c4dff}
+
+.firma-input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#141428;color:#fff;font-size:14px;outline:none;margin:6px 0}
+
+.btn-primary{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:700;background:#00e676;color:#111;cursor:pointer;margin-top:8px}
+.btn-primary:active{opacity:.7}
+.btn-danger{background:#ff1744;color:#fff}
+
+.send-status{text-align:center;padding:20px;color:#00e676;font-size:14px;font-weight:600}
+.send-error{color:#ff5252}
+
+@media(max-width:380px){
+  .qty-grid{grid-template-columns:repeat(2,1fr)}
+  .truck-card{padding:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img class="logo-hdr intergamma" src="intergamma-logo.svg" alt="Intergamma">
+  <div class="brand">📋 <span>BaySync</span> V2 · Almacén</div>
+  <div class="conn-stat">
+    <span class="status-dot offline" id="statusDot"></span>
+    <span id="statusText">---</span>
+  </div>
+</div>
+
+<div class="content" id="mainContent">
+  <div class="empty-state" id="emptyState">
+    <div class="icon">📭</div>
+    <div>Aún no hay camiones asignados<br>Esperando registro desde BALIE...</div>
+  </div>
+  <div id="truckCards"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+// ============================================================
+//  CONFIG
+// ============================================================
+const DB_URL = 'https://baysync-583a2-default-rtdb.europe-west1.firebasedatabase.app';
+
+const CATEGORIES = [
+  {id:'pallet_euro',label:'Euro pallet',short:'Euro'},
+  {id:'rcn',label:'RCN',short:'RCN'},
+  {id:'ww_pallet',label:'WW pallet',short:'WW'},
+  {id:'hplt',label:'HPLT',short:'HPLT'},
+  {id:'rotom',label:'Rotom',short:'Rotom'},
+  {id:'rolcontainer',label:'Rolcontainer',short:'RCG'},
+  {id:'colli',label:'Colli',short:'Colli'},
+  {id:'krat',label:'Krat / cajas',short:'Krat'},
+  {id:'rek',label:'Rek',short:'Rek'},
+  {id:'stukgoed',label:'Stukgoed',short:'Stuk'}
+];
+
+// ============================================================
+//  STATE
+// ============================================================
+let trucks = {};
+let activeTruckId = null;
+let currentTruck = null;
+
+// ============================================================
+//  MAIN
+// ============================================================
+function init() {
+  loadLocalTrucks();
+  renderTruckList();
+  startPolling();
+  setConn('offline','Conectando...');
+}
+
+function setConn(mode, txt) {
+  document.getElementById('statusDot').className = 'status-dot '+mode;
+  document.getElementById('statusText').textContent = txt;
+}
+
+// ============================================================
+//  TRUCK LOADING
+// ============================================================
+function loadLocalTrucks() {
+  try {
+    const s = localStorage.getItem('baysyncv2_trucks');
+    trucks = s ? JSON.parse(s) : {};
+  } catch(e) { trucks = {}; }
+}
+
+function saveLocalTrucks() {
+  localStorage.setItem('baysyncv2_trucks', JSON.stringify(trucks));
+}
+
+// ============================================================
+//  RENDER
+// ============================================================
+function renderTruckList() {
+  const active = Object.values(trucks).filter(t => t.activo && !t.completado && !t.despachado);
+  const completed = Object.values(trucks).filter(t => t.completado && !t.despachado);
+  const container = document.getElementById('truckCards');
+  const empty = document.getElementById('emptyState');
+
+  if (active.length === 0 && completed.length === 0) {
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  let html = '';
+
+  if (active.length > 0) {
+    html += '<div style="font-size:11px;color:#7c4dff;font-weight:700;margin-bottom:6px">🟣 PENDIENTES DE DESCARGA ('+active.length+')</div>';
+    active.sort((a,b)=>b.creado - a.creado);
+    active.forEach(t => {
+      html += renderCard(t, false);
+    });
+  }
+
+  if (completed.length > 0) {
+    html += '<div style="font-size:11px;color:#00e676;font-weight:700;margin:10px 0 6px">✅ DESCARGADOS ('+completed.length+')</div>';
+    completed.forEach(t => {
+      html += renderCard(t, true);
+    });
+  }
+
+  container.innerHTML = html;
+
+  // Bind click
+  document.querySelectorAll('.btn-open-truck').forEach(b => {
+    b.addEventListener('click', function() {
+      const id = this.dataset.id;
+      const truck = Object.values(trucks).find(t => t.id === id);
+      if (truck) openTruckForm(truck);
+    });
+  });
+}
+
+function renderCard(t, completed) {
+  const provStr = t.proveedores.slice(0,3).join(', ')+(t.proveedores.length>3 ? ' +'+(t.proveedores.length-3) : '');
+  return `
+    <div class="truck-card ${completed?'completed':''}">
+      <div class="head">
+        <div class="id">🚛 #${t.id}</div>
+        <div class="door">Puerta ${t.puerta}${t.puerta2?' / '+t.puerta2:''}</div>
+      </div>
+      <div class="prov">📦 ${provStr}</div>
+      <div class="time">🕐 Llegó ${t.llegada||'--:--'} · 🔑 ${t.llave}</div>
+      ${!completed ? `<button class="btn-open btn-open-truck" data-id="${t.id}">📋 Registrar descarga</button>`
+        : `<div style="text-align:center;color:#00e676;font-size:12px;font-weight:600">✅ Descargado</div>`}
+    </div>
+  `;
+}
+
+// ============================================================
+//  TRUCK FORM (MODAL)
+// ============================================================
+function openTruckForm(truck) {
+  activeTruckId = truck.id;
+  currentTruck = JSON.parse(JSON.stringify(truck)); // deep copy
+  const modal = document.getElementById('modalContent');
+
+  let html = `<button class="close-modal" onclick="closeModal()">&times;</button>`;
+  html += `<h3>🚛 Camión #${truck.id} · Puerta ${truck.puerta}</h3>`;
+  html += `<p style="font-size:11px;color:#888;margin-bottom:8px">🕐 ${truck.llegada||'--:--'} · 🔑 ${truck.llave}</p>`;
+
+  truck.proveedores.forEach((p, i) => {
+    const d = currentTruck.descargas[i] || {};
+    html += `<div class="prov-section">`;
+    html += `<h4>📦 ${p}</h4>`;
+
+    // Gericht / BONT direction
+    html += `<div class="dir-row">
+      <button class="dir-btn ${d.gericht?'active':''}" data-prov="${i}" data-dir="gericht" onclick="toggleDir(${i},'gericht')">→ Gericht</button>
+      <button class="dir-btn ${d.bont?'active':''}" data-prov="${i}" data-dir="bont" onclick="toggleDir(${i},'bont')">→ BONT</button>
+    </div>`;
+
+    // Quantity grid
+    html += `<div class="qty-grid">`;
+    CATEGORIES.forEach(c => {
+      const val = d[c.id] || 0;
+      html += `<div class="qty-item">
+        <label>${c.short}</label>
+        <input type="number" min="0" value="${val}" data-prov="${i}" data-cat="${c.id}" oninput="updateQty(${i},'${c.id}',this.value)">
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  // Firma
+  html += `<div style="margin:8px 0">
+    <div style="font-size:11px;color:#aaa;margin-bottom:4px">Firma GC medewerker:</div>
+    <input class="firma-input" id="firmaInput" placeholder="Tu nombre" value="${truck.firma_encargado||''}">
+  </div>`;
+
+  html += `<button class="btn-primary" onclick="submitDescarga()">📤 ENVIAR DESCARGA</button>`;
+  html += `<button class="btn-primary btn-danger" onclick="closeModal()">Cancelar</button>`;
+
+  modal.innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function toggleDir(provIdx, dir) {
+  const d = currentTruck.descargas[provIdx];
+  if (!d) return;
+  d[dir] = !d[dir];
+// Update button visuals
+document.querySelectorAll(`.dir-btn[data-prov="${provIdx}"]`).forEach(b => {
+const d2 = currentTruck.descargas[provIdx];
+b.classList.toggle('active', d2 && d2[b.dataset.dir]);
+});
+}
+
+function updateQty(provIdx, catId, val) {
+const d = currentTruck.descargas[provIdx];
+if (!d) return;
+d[catId] = parseInt(val) || 0;
+}
+
+function closeModal() {
+document.getElementById('modalOverlay').classList.remove('show');
+activeTruckId = null;
+currentTruck = null;
+}
+
+async function submitDescarga() {
+if (!currentTruck) return;
+const firma = document.getElementById('firmaInput').value.trim();
+if (!firma) { alert('Firma tu nombre'); return; }
+
+currentTruck.firma_encargado = firma;
+currentTruck.completado = true;
+currentTruck.descargando = false;
+currentTruck.descarga_completa = Date.now();
+
+// Update truck in local storage
+trucks[currentTruck.id] = {...currentTruck};
+saveLocalTrucks();
+
+// Save to Firebase
+if (navigator.onLine) {
+try {
+await fetch(DB_URL+'/camiones/'+currentTruck.id+'.json', {
+method: 'PUT',
+body: JSON.stringify(currentTruck)
+});
+} catch(e) {}
+}
+
+closeModal();
+renderTruckList();
+
+// Show feedback
+const modal = document.getElementById('modalContent');
+modal.innerHTML = `<div class="send-status">✅ Descarga de #${currentTruck.id} enviada correctamente</div>`;
+document.getElementById('modalOverlay').classList.add('show');
+setTimeout(()=>{ document.getElementById('modalOverlay').classList.remove('show'); }, 2000);
+}
+
+// ============================================================
+// POLLING
+// ============================================================
+function startPolling() {
+// Immediate fetch
+fetchTrucksFromFirebase();
+
+// Every 3 seconds
+setInterval(fetchTrucksFromFirebase, 3000);
+}
+
+async function fetchTrucksFromFirebase() {
+try {
+const resp = await fetch(DB_URL+'/camiones.json');
+const data = await resp.json();
+if (data) {
+let changed = false;
+Object.entries(data).forEach(([k,v]) => {
+if (v && v.activo && !v.despachado) {
+if (!trucks[k] || JSON.stringify(trucks[k].descargas) !== JSON.stringify(v.descargas) ||
+trucks[k].completado !== v.completado) {
+trucks[k] = v;
+changed = true;
+}
+}
+});
+// Remove trucks that are no longer active
+Object.keys(trucks).forEach(k => {
+if (!data[k] || data[k].despachado) { delete trucks[k]; changed = true; }
+});
+if (changed) {
+saveLocalTrucks();
+renderTruckList();
+}
+}
+setConn('online','En vivo');
+} catch(e) {
+setConn('offline','Desconectado');
+}
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
+</script>
+</body>
+</html>
