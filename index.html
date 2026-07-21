@@ -13,12 +13,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .header .brand span{color:#00e676}
 .logo-hdr{height:22px;opacity:.7;flex-shrink:0}
 .logo-hdr.intergamma{height:20px}
+.settings-btn{background:0;border:none;color:#555;font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.settings-btn:active{background:rgba(255,255,255,.1)}
 .lang-btn{background:0;border:1px solid #444;color:#888;border-radius:6px;padding:3px 6px;font-size:10px;cursor:pointer;font-weight:600;flex-shrink:0}
 .lang-btn.active{border-color:#00e676;color:#00e676;background:rgba(0,230,118,.1)}
 .tab-bar{display:flex;background:#1a1a2e;border-top:1px solid #252540;flex-shrink:0}
 .tab-btn{flex:1;padding:10px 2px;background:0;border:none;color:#666;font-size:10px;font-weight:600;cursor:pointer;transition:.15s;position:relative;text-align:center;line-height:1.2}
 .tab-btn.active{color:#00e676;background:rgba(0,230,118,.08)}
-.tab-btn.active::after{content:'';position:absolute;bottom:0;left:20%;width:60%;height:2px;background:#00e676;border-radius:2px}
+.tab-btn.active::after{content:'';position:absolute;top:0;left:20%;width:60%;height:2px;background:#00e676;border-radius:2px}
 .tab-btn .badge{background:#ff1744;color:#fff;font-size:8px;padding:1px 4px;border-radius:8px;margin-left:2px}
 .content{flex:1;overflow-y:auto;padding:10px;display:block}
 .content.hidden{display:none}
@@ -76,8 +78,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .day-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;flex-shrink:0;background:#1a1a2e;border-top:1px solid #252540;gap:8px}
 .day-status{font-size:11px;font-weight:600}
 .day-status.open{color:#00e676}.day-status.closed{color:#ff5252}
-.day-btn{padding:6px 14px;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer}
-.day-btn.op{background:#00e676;color:#111}.day-btn.cl{background:#ff1744;color:#fff}.day-btn.ex{background:#333;color:#ccc}
+/* day buttons now inside settings modal via openSettings() */
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.show{display:flex}
 .modal{background:#1e1e36;border-radius:14px;padding:16px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto}
@@ -92,14 +93,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="header">
   <img class="logo-hdr intergamma" src="intergamma-logo.svg" alt="Intergamma">
   <div class="brand" id="brandTitle">🚛 <span>BaySync</span> V2</div>
-  <div style="display:flex;gap:3px">
+  <div style="display:flex;gap:3px;align-items:center">
+    <button class="settings-btn" onclick="openSettings()" id="settingsBtn" title="Ajustes">⚙️</button>
     <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
     <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
     <button class="lang-btn" data-lang="nl" onclick="setLang('nl')">NL</button>
   </div>
 </div>
-
-<div class="tab-bar" id="tabBar"></div>
 
 <div class="content" id="tabMuelles">
   <div class="door-view" id="doorView"></div>
@@ -130,15 +130,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="content hidden" id="tabEspera"><div id="waitList"></div></div>
 <div class="content hidden" id="tabCurso"><div id="truckList"></div></div>
 
+<div class="tab-bar" id="tabBar"></div>
+
 <div class="day-bar">
   <div>
     <div class="day-status closed" id="dayStatus">🔴</div>
     <div style="font-size:9px;color:#555" id="dayDate"></div>
-  </div>
-  <div style="display:flex;gap:5px">
-    <button class="day-btn op" id="btnOpen"></button>
-    <button class="day-btn cl" id="btnClose" style="display:none"></button>
-    <button class="day-btn ex" id="btnExport" style="display:none">⬇ CSV</button>
   </div>
 </div>
 
@@ -167,7 +164,10 @@ const LANG={
     viewBtn:'📋 Ver',dispatchBtn:'🔑 Despachar',
     dayClosed:'🔴 Día cerrado',dayOpen:'🟢 Día abierto',
     dayStart:'Abre un día para empezar',
-    openBtn:'▶ Abrir día',closeBtn:'■ Cerrar',exportBtn:'⬇ CSV',
+    settingsTitle:'⚙️ Ajustes del día',
+    openBtn:'▶ Abrir día',closeBtn:'■ Cerrar día',exportBtn:'⬇ Exportar CSV',
+    dayConfirmOpen:'¿Abrir un nuevo día? Se borrará el día anterior.',
+    dayConfirmClose:'¿Cerrar el día? Los botones de registro se desactivarán.',
     confirmDesp:'✅ CONFIRMAR DESPACHO',cancel:'Cancelar',close:'Cerrar',
     keyReturned:'¿Devolvió la llave',keyYes:'Sí, devolvió la llave',keyNo:'No, pendiente',
     firmaForm:'Firma del formulario',signBo:'Tu nombre',signDriver:'Nombre del conductor (mayúsculas)',
@@ -198,7 +198,10 @@ const LANG={
     viewBtn:'📋 View',dispatchBtn:'🔑 Dispatch',
     dayClosed:'🔴 Day closed',dayOpen:'🟢 Day open',
     dayStart:'Open a day to start',
-    openBtn:'▶ Open day',closeBtn:'■ Close',exportBtn:'⬇ CSV',
+    settingsTitle:'⚙️ Day settings',
+    openBtn:'▶ Open day',closeBtn:'■ Close day',exportBtn:'⬇ Export CSV',
+    dayConfirmOpen:'Open a new day? Previous day data will be cleared.',
+    dayConfirmClose:'Close the day? Registration buttons will be disabled.'
     confirmDesp:'✅ CONFIRM DISPATCH',cancel:'Cancel',close:'Close',
     keyReturned:'Did they return key',keyYes:'Yes, key returned',keyNo:'No, pending',
     firmaForm:'Form signature',signBo:'Your name',signDriver:'Driver name (CAPS)',
@@ -229,7 +232,10 @@ const LANG={
     viewBtn:'📋 Bekijk',dispatchBtn:'🔑 Afhandelen',
     dayClosed:'🔴 Dag gesloten',dayOpen:'🟢 Dag open',
     dayStart:'Open een dag om te beginnen',
-    openBtn:'▶ Dag openen',closeBtn:'■ Sluiten',exportBtn:'⬇ CSV',
+    settingsTitle:'⚙️ Dag instellingen',
+    openBtn:'▶ Dag openen',closeBtn:'■ Dag sluiten',exportBtn:'⬇ CSV exporteren',
+    dayConfirmOpen:'Een nieuwe dag openen? Vorige dag wordt gewist.',
+    dayConfirmClose:'Dag sluiten? Registratieknoppen worden uitgeschakeld.'
     confirmDesp:'✅ BEVESTIG AFHANDELING',cancel:'Annuleren',close:'Sluiten',
     keyReturned:'Sleutel teruggegeven',keyYes:'Ja, sleutel terug',keyNo:'Nee, in afwachting',
     firmaForm:'Formulier handtekening',signBo:'Uw naam',signDriver:'Chauffeur naam (HOOFDLETTERS)',
@@ -284,7 +290,6 @@ function applyLang(){
   WAIT_REASONS.forEach(r=>{const o=document.createElement('option');o.value=r.val;o.textContent=r[cl]||r.es;sm.appendChild(o);});
   document.getElementById('btnDescarga').textContent=t('btnDescarga');
   document.getElementById('btnEspera').textContent=t('btnEspera');
-  document.getElementById('btnOpen').textContent=t('openBtn');document.getElementById('btnClose').textContent=t('closeBtn');
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===cl));
   renderD(doorsState);renderW();renderT();
   if(currentTab)switchTab(currentTab,true);
@@ -309,9 +314,6 @@ function init(){
   renderD({});updDay();renderW();renderT();poll();
   document.getElementById('btnDescarga').onclick=()=>regT(false);
   document.getElementById('btnEspera').onclick=()=>regT(true);
-  document.getElementById('btnOpen').onclick=openDay;
-  document.getElementById('btnClose').onclick=closeDay;
-  document.getElementById('btnExport').onclick=expCSV;
   document.getElementById('inpMotivo').onchange=chk;
 }
 
@@ -324,12 +326,10 @@ function addP(v){
   r.innerHTML=`<span style="color:#888;font-size:10px;width:16px;flex-shrink:0;text-align:center">#${idx}</span><div class="prov-input"><input type="text" class="pa" placeholder="" value="${v||''}" autocomplete="off"><div class="suggestions"></div></div><button class="btn-rm" onclick="rmP(this)">✕</button>`;
   c.appendChild(r);const i=r.querySelector('.pa'),sg=r.querySelector('.suggestions');
   if(!v)i.placeholder=t('addProv').replace('+ ','');
-  i.oninput=function(){const q=this.value.toLowerCase().trim();sg.innerHTML='';if(!q){sg.classList.remove('show');return;}
-    const m=SUP.filter(x=>x.toLowerCase().includes(q));if(!m.length){sg.classList.remove('show');return;}
-    m.forEach(x=>{const d=document.createElement('div');d.textContent=x;d.onclick=()=>{i.value=x;sg.classList.remove('show');chk();};sg.appendChild(d)});sg.classList.add('show');};
+  i.oninput=function(){const q=this.value.toLowerCase().trim();sg.innerHTML='';if(q){const m=SUP.filter(x=>x.toLowerCase().includes(q));if(m.length){m.forEach(x=>{const d=document.createElement('div');d.textContent=x;d.onclick=()=>{i.value=x;sg.classList.remove('show');chk();};sg.appendChild(d)});sg.classList.add('show');}}chk();};
   i.onblur=()=>setTimeout(()=>sg.classList.remove('show'),200);
   i.onfocus=function(){if(this.value.trim())this.dispatchEvent(new Event('input'));};
-  i.oninput=function(){chk();};if(!v)i.focus();chk();
+  if(!v)i.focus();chk();
 }
 function rmP(b){b.closest('.prov-row').remove();chk();}
 function chk(){
@@ -367,12 +367,23 @@ function renderD(state){
 
 // ============================ DAY ============================
 function updDay(){
-  const ds=document.getElementById('dayStatus'),dd=document.getElementById('dayDate'),bo=document.getElementById('btnOpen'),bc=document.getElementById('btnClose'),be=document.getElementById('btnExport');
-  if(open){ds.className='day-status open';ds.textContent=t('dayOpen')+' — '+date;dd.textContent='';bo.style.display='none';bc.style.display='inline-block';be.style.display='inline-block';}
-  else{ds.className='day-status closed';ds.textContent=t('dayClosed');dd.textContent=t('dayStart');bo.style.display='inline-block';bc.style.display='none';be.style.display='none';}
+  const ds=document.getElementById('dayStatus'),dd=document.getElementById('dayDate');
+  if(open){ds.className='day-status open';ds.textContent=t('dayOpen')+' — '+date;dd.textContent='';}
+  else{ds.className='day-status closed';ds.textContent=t('dayClosed');dd.textContent=t('dayStart');}
 }
 function openDay(){const t2=new Date().toISOString().split('T')[0];open=true;date=t2;saveD();updDay();fetch(DB+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:true,fecha:t2})}).catch(()=>{});chk();}
 function closeDay(){open=false;saveD();updDay();fetch(DB+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:false,fecha:date})}).catch(()=>{});document.getElementById('btnDescarga').disabled=true;document.getElementById('btnEspera').disabled=true;}
+function openSettings(){
+  const m=document.getElementById('modalContent');
+  m.innerHTML=`<button class="close-modal" onclick="closeM()">&times;</button>
+    <h3>${t('settingsTitle')}</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:10px">${t(open?'dayOpen':'dayClosed')}${date?' — '+date:''}</p>
+    <button class="btn-pri" style="background:#00e676;color:#111" onclick="closeM();openDay()">${t('openBtn')}</button>
+    <button class="btn-pri" style="background:#ff1744" onclick="closeM();closeDay()">${t('closeBtn')}</button>
+    <button class="btn-pri" style="background:#333" onclick="closeM();expCSV()">${t('exportBtn')}</button>
+    <button class="btn-pri" style="background:#333;margin-top:10px" onclick="closeM()">${t('cancel')}</button>`;
+  document.getElementById('modalOv').classList.add('show');
+}
 function saveD(){localStorage.setItem(DAY_KEY,JSON.stringify({open,date}))}
 function saveT(){localStorage.setItem(TRUCK_KEY,JSON.stringify(trucks))}
 function badges(){const bE=document.getElementById('badgeE'),bC=document.getElementById('badgeC');if(bE)bE.textContent=Object.values(trucks).filter(t=>t.espera).length;if(bC)bC.textContent=Object.values(trucks).filter(t=>t.activo&&!t.despachado).length;}
