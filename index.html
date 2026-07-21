@@ -5,33 +5,28 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>BaySync V2 · BALIE</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   background:#0f0f1a;color:#fff;display:flex;flex-direction:column;
   user-select:none
 }
-
-/* HEADER */
 .header{background:#1a1a2e;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px}
 .header .brand{font-size:16px;font-weight:700;text-align:center}
 .header .brand span{color:#00e676}
 .logo-hdr{height:26px;opacity:.7;flex-shrink:0}
 .logo-hdr.intergamma{height:24px}
 
-/* TABS */
 .tab-bar{display:flex;background:#1a1a2e;border-top:1px solid #252540;flex-shrink:0}
-.tab-btn{flex:1;padding:12px 4px;background:0;border:none;color:#666;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;position:relative;text-align:center;line-height:1.2}
+.tab-btn{flex:1;padding:10px 3px;background:0;border:none;color:#666;font-size:11px;font-weight:600;cursor:pointer;transition:.15s;position:relative;text-align:center;line-height:1.2}
 .tab-btn.active{color:#00e676;background:rgba(0,230,118,.08)}
 .tab-btn.active::after{content:'';position:absolute;bottom:0;left:25%;width:50%;height:2px;background:#00e676;border-radius:2px}
 .tab-btn .badge{background:#ff1744;color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:3px}
 
-/* CONTENT */
 .content{flex:1;overflow-y:auto;padding:10px;display:block}
 .content.hidden{display:none}
 
-/* CONN */
 .conn-row{display:flex;align-items:center;justify-content:space-between;padding:4px 14px;background:#1a1a2e;border-top:1px solid #252540;flex-shrink:0}
 .conn-stat{display:flex;align-items:center;gap:4px;font-size:10px;color:#888}
 .status-dot{width:7px;height:7px;border-radius:50%;display:inline-block}
@@ -41,12 +36,7 @@ body{
 /* TAB 1: DOORS — READ ONLY */
 .door-view{font-size:10px;color:#555;text-align:center;padding:2px 0 6px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:480px;margin:0 auto}
-.door{
-  border-radius:12px;padding:14px 8px;text-align:center;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:80px;border:2px solid transparent;background:#1e1e36;
-  cursor:default
-}
+.door{border-radius:12px;padding:14px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80px;border:2px solid transparent;background:#1e1e36;cursor:default}
 .door .num{font-size:26px;font-weight:800;line-height:1.1}
 .door .label{font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-top:2px;font-weight:600}
 .door.libre{border-color:#00e676;background:#1a2e1a}
@@ -56,7 +46,30 @@ body{
 .door.parcial{border-color:#ffd740;background:#2e2a1a}
 .door.parcial .num,.door.parcial .label{color:#ffd740}
 
-/* TAB 2: TRUCKS */
+/* TAB 2: REGISTRO */
+.form-card{background:#1e1e36;border-radius:12px;padding:14px;margin-bottom:10px;max-width:600px;margin-left:auto;margin-right:auto}
+.form-card h3{font-size:13px;color:#00e676;margin-bottom:10px;font-weight:700}
+.form-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.form-group{flex:1;min-width:80px}
+.form-group label{display:block;font-size:10px;color:#888;margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.form-group input,.form-group select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid #333;background:#141428;color:#fff;font-size:14px;outline:none;transition:border .15s}
+.form-group input:focus,.form-group select:focus{border-color:#00e676}
+.prov-row{display:flex;gap:6px;align-items:center;margin-bottom:5px}
+.prov-row .prov-input{flex:1;position:relative}
+.prov-row .prov-input input{width:100%;padding:8px 10px;border-radius:8px;border:1px solid #333;background:#141428;color:#fff;font-size:13px;outline:none}
+.prov-row .prov-input input:focus{border-color:#00e676}
+.prov-row .btn-rm{background:#ff1744;border:none;color:#fff;width:30px;height:30px;border-radius:8px;font-size:16px;cursor:pointer;flex-shrink:0;font-weight:700}
+.btn-add{background:0;border:1px dashed #444;color:#888;padding:8px;border-radius:8px;font-size:12px;cursor:pointer;width:100%;margin-bottom:8px}
+.btn-add:hover{border-color:#00e676;color:#00e676}
+.suggestions{position:absolute;top:100%;left:0;right:0;background:#1e1e36;border:1px solid #333;border-radius:0 0 8px 8px;max-height:160px;overflow-y:auto;z-index:10;display:none}
+.suggestions.show{display:block}
+.suggestions div{padding:7px 10px;font-size:12px;cursor:pointer;border-bottom:1px solid #252540;color:#ccc}
+.suggestions div:hover,.suggestions div.active{background:#00e67622;color:#fff}
+.btn-pri{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:700;background:#00e676;color:#111;cursor:pointer;transition:opacity .12s;margin-top:4px}
+.btn-pri:active{opacity:.7}
+.btn-pri:disabled{opacity:.25;cursor:default}
+
+/* TAB 3: TRUCKS */
 .truck-card{background:#1e1e36;border-radius:12px;padding:12px 14px;margin-bottom:8px;max-width:600px;margin-left:auto;margin-right:auto;border-left:3px solid #ffd740}
 .truck-card.despatched{border-left-color:#00e676;opacity:.7}
 .truck-card .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
@@ -65,39 +78,36 @@ body{
 .truck-card .door{font-size:12px;color:#aaa;font-weight:600}
 .truck-card .prov{font-size:11px;color:#888;margin-bottom:4px}
 .truck-card .time{font-size:10px;color:#666}
-.truck-card .status-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700}
-.truck-card .badge-inside{background:#ffd74022;color:#ffd740;border:1px solid #ffd740}
-.truck-card .badge-desp{background:#00e67622;color:#00e676;border:1px solid #00e676}
-.truck-actions{display:flex;gap:6px;margin-top:6px}
-.truck-actions button{flex:1;padding:8px;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer}
-.truck-actions .btn-dispatch{background:#ffd740;color:#111}
-.truck-actions .btn-view{background:#333;color:#ccc}
+.truck-card .sb{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700}
+.truck-card .sb-c{background:#ffd74022;color:#ffd740;border:1px solid #ffd740}
+.truck-card .sb-d{background:#00e67622;color:#00e676;border:1px solid #00e676}
+.truck-act{display:flex;gap:6px;margin-top:6px}
+.truck-act button{flex:1;padding:8px;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer}
+.truck-act .btn-disp{background:#ffd740;color:#111}
+.truck-act .btn-view{background:#333;color:#ccc}
 
 .empty-state{text-align:center;padding:40px 20px;color:#555;font-size:13px}
 
-/* DAY BAR */
 .day-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;flex-shrink:0;background:#1a1a2e;border-top:1px solid #252540;gap:8px}
 .day-status{font-size:11px;font-weight:600}
 .day-status.open{color:#00e676}
 .day-status.closed{color:#ff5252}
 .day-btn{padding:6px 14px;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer}
-.day-btn.open-day{background:#00e676;color:#111}
-.day-btn.close-day{background:#ff1744;color:#fff}
-.day-btn.export-btn{background:#333;color:#ccc}
+.day-btn.op{background:#00e676;color:#111}
+.day-btn.cl{background:#ff1744;color:#fff}
+.day-btn.ex{background:#333;color:#ccc}
 
-/* MODAL */
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.show{display:flex}
 .modal{background:#1e1e36;border-radius:14px;padding:16px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto}
 .modal h3{font-size:14px;color:#00e676;margin-bottom:10px}
 .close-modal{float:right;background:0;border:none;color:#888;font-size:22px;cursor:pointer}
 .firma-input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#141428;color:#fff;font-size:14px;outline:none;margin:6px 0}
-.btn-primary{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:700;background:#00e676;color:#111;cursor:pointer;margin-top:4px}
-.btn-primary:active{opacity:.7}
 
 @media(max-width:380px){
-  .door{min-height:68px;padding:8px 4px}
-  .door .num{font-size:22px}
+  .door{min-height:68px;padding:8px 4px}.door .num{font-size:22px}
+  .tab-btn{font-size:10px;padding:8px 3px}
+  .form-row{gap:5px}.form-group{min-width:65px}
 }
 </style>
 </head>
@@ -110,13 +120,30 @@ body{
 </div>
 
 <div class="tab-bar">
-  <button class="tab-btn active" data-tab="muelles">🚪 Muelles</button>
-  <button class="tab-btn" data-tab="curso">🚛 En curso <span class="badge" id="badgeCurso">0</span></button>
+  <button class="tab-btn active" data-t="muelles">🚪 Muelles</button>
+  <button class="tab-btn" data-t="registro">📝 Ingreso</button>
+  <button class="tab-btn" data-t="curso">🚛 En curso <span class="badge" id="badgeC">0</span></button>
 </div>
 
 <div class="content" id="tabMuelles">
   <div class="door-view">📍 Vista en vivo · Actualizado desde almacén</div>
   <div class="grid" id="doorGrid"></div>
+</div>
+
+<div class="content hidden" id="tabRegistro">
+  <div class="form-card">
+    <h3>📥 Registrar camión entrante</h3>
+    <div class="form-row">
+      <div class="form-group" style="min-width:70px"><label>ID Conductor</label><input type="text" id="inpId" placeholder="01" inputmode="numeric" maxlength="4"></div>
+      <div class="form-group" style="min-width:80px"><label>Puerta</label><select id="inpDoor"><option value="">—</option></select></div>
+      <div class="form-group" style="min-width:70px"><label>2ª Puerta</label><select id="inpDoor2"><option value="">—</option></select></div>
+      <div class="form-group" style="min-width:70px"><label>🔑 Llave</label><input type="text" id="inpKey" placeholder="B3" maxlength="6"></div>
+    </div>
+    <label style="display:block;font-size:10px;color:#888;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Proveedores</label>
+    <div id="provList"></div>
+    <button class="btn-add" id="btnAddProv">+ Agregar proveedor</button>
+    <button class="btn-pri" id="btnReg" disabled>📤 ENVIAR A DESCARGA</button>
+  </div>
 </div>
 
 <div class="content hidden" id="tabCurso">
@@ -129,155 +156,71 @@ body{
     <div style="font-size:9px;color:#555" id="dayDate"></div>
   </div>
   <div style="display:flex;gap:5px">
-    <button class="day-btn open-day" id="btnOpenDay">▶ Abrir día</button>
-    <button class="day-btn close-day" id="btnCloseDay" style="display:none">■ Cerrar</button>
-    <button class="day-btn export-btn" id="btnExport" style="display:none">⬇ CSV</button>
+    <button class="day-btn op" id="btnOpen">▶ Abrir día</button>
+    <button class="day-btn cl" id="btnClose" style="display:none">■ Cerrar</button>
+    <button class="day-btn ex" id="btnExport" style="display:none">⬇ CSV</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="modalOverlay">
+<div class="modal-overlay" id="modalOv">
   <div class="modal" id="modalContent"></div>
 </div>
 
 <script>
-const DB_URL = 'https://baysync-583a2-default-rtdb.europe-west1.firebasedatabase.app';
-const DOORS = [18,19,20,21,22,23,24,25,26];
-const CATEGORIES = [
-  {id:'pallet_euro',short:'Euro'},{id:'rcn',short:'RCN'},{id:'ww_pallet',short:'WW'},
-  {id:'hplt',short:'HPLT'},{id:'rotom',short:'Rotom'},{id:'rolcontainer',short:'RCG'},
-  {id:'colli',short:'Colli'},{id:'krat',short:'Krat'},{id:'rek',short:'Rek'}
-];
-const DAY_KEY = 'baysyncv2_day';
-let dayOpen = false, dayDate = null, trucks = {};
+const DB='https://baysync-583a2-default-rtdb.europe-west1.firebasedatabase.app';
+const SUP=["Akzo Nobel Coatings","Akzo Belgie","Allibert","Batavia","Bison International","Black & Decker (NL)","Black & Decker (Ceva)","Brilliant AG","Calodar NV","Coram (Leadtimer)","Durieu","Eglo Verlichting Nederland BV","Electro Cirkel Retail B.V.","Electrolux Home Products","Eltra B.V. (Leadtimer)","EUROMAC","Gevavi Schoeisel B.V.","Gimeg Nederland BV","Graham & Brown","GROHE BELGIE NV/SA","GROHE NEDERLAND B.V.","Hansgrohe","Hugo Brennenstuhl","Karcher","Koopman International B.V.","Korver Holland B.V.","KPE Holland","LENCO","Lightmakers SNEL","LUCIDE","LUTEC","Makita Belgie N.V.","Makita Nederland B.V.","Martin Mathys","Mega Collections","Navstar","Noord West Nederland","Novatech NV","Pick Up International B.V.","Robert Bosch B.V.","Service Best International (Leadtimer)","SHI","Sigma Coatings","Signify Netherlands B.V.","Soudal N.V.","SPS de Steenbok","Suki International B.V.","Talen Tools","Tiger (Leadtimer)","Tristar Retouradres","V33 (DISTRILOG)","Van Loon Sealskin","Van Spijk Agenturen","Vepa Bins B.V.","Vliegenthart","Weber","Stipt","Vebon NV","Arvesta","Aqmos"].sort((a,b)=>a.localeCompare(b));
+const CAT=[{id:'pallet_euro',short:'Euro'},{id:'rcn',short:'RCN'},{id:'ww_pallet',short:'WW'},{id:'hplt',short:'HPLT'},{id:'rotom',short:'Rotom'},{id:'rolcontainer',short:'RCG'},{id:'colli',short:'Colli'},{id:'krat',short:'Krat'},{id:'rek',short:'Rek'}];
+const DOORS=[18,19,20,21,22,23,24,25,26];
+const DAY_KEY='***';
+let open=false,date=null,trucks={},pCnt=1;
 
-function init(){
-  loadDay(); loadTrucks(); setupTabs(); renderDoors({}); updateDayUI(); setupDayCtrl(); renderTruckList(); startPoll();
+function init(){loadD();loadT();initSel();setupProv();setupTabs();renderD({});updDay();updDayCtrl();renderT();poll();document.getElementById('btnReg').onclick=regT;}
+function loadD(){try{const s=localStorage.getItem(DAY_KEY);if(s){const d=JSON.parse(s);open=d.open;date=d.date}}catch(e){}}
+function saveD(){localStorage.setItem(DAY_KEY,JSON.stringify({open,date}))}
+function loadT(){try{const s=localStorage.getItem('baysyncv2_trucks');trucks=s?JSON.parse(s):{}}catch(e){trucks={}}}
+function renderD(state){document.getElementById('doorGrid').innerHTML=DOORS.map(d=>{const st=state[d]||'libre',lb={libre:'🟢 Libre',ocupado:'🔴 Ocupado',parcial:'🟡 Parcial'};return `<div class="door ${st}"><div class="num">${d}</div><div class="label">${lb[st]}</div></div>`}).join('')}
+function updDay(){const ds=document.getElementById('dayStatus'),dd=document.getElementById('dayDate'),bo=document.getElementById('btnOpen'),bc=document.getElementById('btnClose'),be=document.getElementById('btnExport');if(open){ds.className='day-status open';ds.textContent='🟢 Día abierto — '+date;dd.textContent=fmt(date);bo.style.display='none';bc.style.display='inline-block';be.style.display='inline-block';}else{ds.className='day-status closed';ds.textContent='🔴 Día cerrado';dd.textContent='Abre un día para empezar';bo.style.display='inline-block';bc.style.display='none';be.style.display='none';}}
+function fmt(d){try{return new Date(d+'T12:00:00').toLocaleDateString('es',{day:'2-digit',month:'long',year:'numeric'})}catch(e){return d}}
+function openDay(){const t=new Date().toISOString().split('T')[0];open=true;date=t;saveD();updDay();fetch(DB+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:true,fecha:t})}).catch(()=>{});document.getElementById('btnReg').disabled=false;}
+function closeDay(){open=false;saveD();updDay();fetch(DB+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:false,fecha:date})}).catch(()=>{});document.getElementById('btnReg').disabled=true;}
+function updDayCtrl(){document.getElementById('btnOpen').onclick=openDay;document.getElementById('btnClose').onclick=closeDay;document.getElementById('btnExport').onclick=expCSV;}
+function setupTabs(){document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.content').forEach(c=>c.classList.add('hidden'));document.getElementById('tab'+b.dataset.t.charAt(0).toUpperCase()+b.dataset.t.slice(1)).classList.remove('hidden');if(b.dataset.t==='curso')renderT();})}
+function initSel(){const s1=document.getElementById('inpDoor'),s2=document.getElementById('inpDoor2');DOORS.forEach(d=>{s1.innerHTML+=`<option value="${d}">Puerta ${d}</option>`;s2.innerHTML+=`<option value="${d}">Puerta ${d}</option>`})}
+function setupProv(){document.getElementById('btnAddProv').onclick=()=>addP();addP();document.getElementById('inpId').oninput=chk;document.getElementById('inpDoor').onchange=chk;document.getElementById('inpKey').oninput=chk;}
+function addP(v){
+  const c=document.getElementById('provList'),idx=pCnt++;const r=document.createElement('div');r.className='prov-row';
+  r.innerHTML=`<span style="color:#888;font-size:11px;width:20px;flex-shrink:0;text-align:center">#${idx}</span><div class="prov-input"><input type="text" class="pa" placeholder="Escribe proveedor..." value="${v||''}" autocomplete="off"><div class="suggestions"></div></div><button class="btn-rm" onclick="rmP(this)">✕</button>`;
+  c.appendChild(r);const i=r.querySelector('.pa'),s=r.querySelector('.suggestions');
+  i.oninput=function(){const v=this.value.toLowerCase().trim();s.innerHTML='';if(!v){s.classList.remove('show');return;}const m=SUP.filter(x=>x.toLowerCase().includes(v));if(!m.length){s.classList.remove('show');return;}m.forEach(x=>{const d=document.createElement('div');d.textContent=x;d.onclick=()=>{i.value=x;s.classList.remove('show');chk();};s.appendChild(d)});s.classList.add('show');};
+  i.onblur=()=>setTimeout(()=>s.classList.remove('show'),200);i.onfocus=function(){if(this.value.trim())this.dispatchEvent(new Event('input'));};i.oninput=function(){chk();};if(!v)i.focus();chk();
 }
-function loadDay(){
-  try{const s=localStorage.getItem(DAY_KEY);if(s){const d=JSON.parse(s);dayOpen=d.open;dayDate=d.date}}catch(e){}
+function rmP(b){b.closest('.prov-row').remove();chk();}
+function chk(){const ok=open&&document.getElementById('inpId').value.trim()&&document.getElementById('inpDoor').value&&document.getElementById('inpKey').value.trim()&&[...document.querySelectorAll('.pa')].some(p=>p.value.trim());document.getElementById('btnReg').disabled=!ok;}
+async function regT(){
+  const id=document.getElementById('inpId').value.trim().padStart(2,'0'),puerta=parseInt(document.getElementById('inpDoor').value),puerta2=document.getElementById('inpDoor2').value?parseInt(document.getElementById('inpDoor2').value):null,llave=document.getElementById('inpKey').value.trim(),provs=[...document.querySelectorAll('.pa')].map(p=>p.value.trim()).filter(Boolean);
+  if(!id||!puerta||!llave||!provs.length)return;
+  const t={id,puerta,puerta2,llave,proveedores:provs,creado:Date.now(),llegada:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),activo:true,completado:false,despachado:false,descargas:{},firma_encargado:'',salida:null,llave_devuelta:false,fecha:date};
+  provs.forEach((_,i)=>{t.descargas[i]={proveedor:provs[i],gericht:false,bont:false};CAT.forEach(c=>t.descargas[i][c.id]=0);});
+  if(navigator.onLine)try{await fetch(DB+'/camiones/'+id+'.json',{method:'PUT',body:JSON.stringify(t)})}catch(e){}
+  trucks[id]=t;localStorage.setItem('baysyncv2_trucks',JSON.stringify(trucks));badge();renderT();
+  const du={};du[puerta]='ocupado';if(puerta2)du[puerta2]='ocupado';
+  try{await fetch(DB+'/muelles/doors.json',{method:'PATCH',body:JSON.stringify(du)})}catch(e){}
+  document.getElementById('inpId').value='';document.getElementById('inpDoor').value='';document.getElementById('inpDoor2').value='';document.getElementById('inpKey').value='';document.getElementById('provList').innerHTML='';pCnt=0;addP();chk();
 }
-function saveDay(){localStorage.setItem(DAY_KEY,JSON.stringify({open:dayOpen,date:dayDate}));}
-function loadTrucks(){try{const s=localStorage.getItem('baysyncv2_trucks');trucks=s?JSON.parse(s):{}}catch(e){trucks={}}}
-function renderDoors(state){
-  const g=document.getElementById('doorGrid');
-  g.innerHTML=DOORS.map(d=>{
-    const st=state[d]||'libre';
-    const lb={libre:'🟢 Libre',ocupado:'🔴 Ocupado',parcial:'🟡 Parcial'};
-    return `<div class="door ${st}"><div class="num">${d}</div><div class="label">${lb[st]}</div></div>`;
-  }).join('');
-}
-function updateDayUI(){
-  const ds=document.getElementById('dayStatus'),dd=document.getElementById('dayDate');
-  const bo=document.getElementById('btnOpenDay'),bc=document.getElementById('btnCloseDay'),be=document.getElementById('btnExport');
-  if(dayOpen){ds.className='day-status open';ds.textContent='🟢 Día abierto — '+dayDate;dd.textContent=fmtDate(dayDate);bo.style.display='none';bc.style.display='inline-block';be.style.display='inline-block';}
-  else{ds.className='day-status closed';ds.textContent='🔴 Día cerrado';dd.textContent='Abre un día para empezar';bo.style.display='inline-block';bc.style.display='none';be.style.display='none';}
-}
-function fmtDate(d){try{return new Date(d+'T12:00:00').toLocaleDateString('es',{day:'2-digit',month:'long',year:'numeric'})}catch(e){return d}}
-function openDay(){
-  const t=new Date().toISOString().split('T')[0];
-  dayOpen=true;dayDate=t;saveDay();updateDayUI();
-  fetch(DB_URL+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:true,fecha:t})}).catch(()=>{});
-}
-function closeDay(){dayOpen=false;saveDay();updateDayUI();fetch(DB_URL+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:false,fecha:dayDate})}).catch(()=>{});}
-function setupDayCtrl(){document.getElementById('btnOpenDay').onclick=openDay;document.getElementById('btnCloseDay').onclick=closeDay;document.getElementById('btnExport').onclick=exportCSV;}
-function setupTabs(){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>{
-    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    document.querySelectorAll('.content').forEach(c=>c.classList.add('hidden'));
-    document.getElementById('tab'+b.dataset.tab.charAt(0).toUpperCase()+b.dataset.tab.slice(1)).classList.remove('hidden');
-    if(b.dataset.tab==='curso')renderTruckList();
-  });
-}
-function renderTruckList(){
-  const l=document.getElementById('truckList');
-  const a=Object.values(trucks).filter(t=>t.activo&&!t.despachado);
-  const d=Object.values(trucks).filter(t=>t.despachado);
+function badge(){document.getElementById('badgeC').textContent=Object.values(trucks).filter(t=>t.activo&&!t.despachado).length;}
+function renderT(){
+  const l=document.getElementById('truckList'),a=Object.values(trucks).filter(t=>t.activo&&!t.despachado),d=Object.values(trucks).filter(t=>t.despachado);
   if(!a.length&&!d.length){l.innerHTML='<div class="empty-state">📭 No hay camiones hoy</div>';badge();return;}
-  let h='';
-  if(a.length){
-    h+='<div style="font-size:11px;color:#ffd740;font-weight:700;margin-bottom:6px">🟡 EN CURSO ('+a.length+')</div>';
-    a.sort((x,y)=>x.creado-y.creado);
-    a.forEach(t=>h+=card(t,false));
-  }
-  if(d.length){
-    h+='<div style="font-size:11px;color:#00e676;font-weight:700;margin:10px 0 6px">✅ DESPACHADOS ('+d.length+')</div>';
-    d.sort((x,y)=>x.creado-y.creado);
-    d.forEach(t=>h+=card(t,true));
-  }
-  l.innerHTML=h;
-  document.querySelectorAll('.btn-v').forEach(b=>b.onclick=function(){openModal(this.dataset.id);});
-  document.querySelectorAll('.btn-d').forEach(b=>b.onclick=function(){openDispatch(this.dataset.id);});
-  badge();
+  let h='';if(a.length){h+='<div style="font-size:11px;color:#ffd740;font-weight:700;margin-bottom:6px">🟡 EN CURSO ('+a.length+')</div>';a.sort((x,y)=>x.creado-y.creado).forEach(t=>h+=card(t,0));}
+  if(d.length){h+='<div style="font-size:11px;color:#00e676;font-weight:700;margin:10px 0 6px">✅ DESPACHADOS ('+d.length+')</div>';d.sort((x,y)=>x.creado-y.creado).forEach(t=>h+=card(t,1));}
+  l.innerHTML=h;document.querySelectorAll('.btn-v').forEach(b=>b.onclick=function(){openModal(this.dataset.id)});document.querySelectorAll('.btn-d').forEach(b=>b.onclick=function(){openDisp(this.dataset.id)});badge();
 }
-function card(t,des){
-  const p=t.proveedores.slice(0,3).join(', ')+(t.proveedores.length>3?' +'+(t.proveedores.length-3):'');
-  const act=!des?`<div class="truck-actions">${!t.completado?'<button class="btn-view btn-v" data-id="'+t.id+'">📋 Ver</button>':'<button class="btn-dispatch btn-d" data-id="'+t.id+'">🔑 Despachar</button>'}</div>`
-    :'<div class="truck-actions"><button class="btn-view btn-v" data-id="'+t.id+'">📋 Ver</button></div>';
-  return `<div class="truck-card ${des?'despatched':''}"><div class="head"><div><span class="status-badge ${des?'badge-desp':'badge-inside'}">${des?'✅ Despachado':'🟡 En descarga'}</span></div><div class="id">#${t.id}</div></div>
-    <div class="door">🚪 ${t.puerta}${t.puerta2?' + '+t.puerta2:''}  ·  🔑 ${t.llave}</div><div class="prov">📦 ${p}</div>
-    <div class="time">🕐 Llegada: ${t.llegada||'--:--'}${t.salida?' · Salida: '+t.salida:''}</div>${act}</div>`;
-}
-function badge(){document.getElementById('badgeCurso').textContent=Object.values(trucks).filter(t=>t.activo&&!t.despachado).length;}
-function openModal(id){
-  const t=trucks[id];if(!t)return;
-  const m=document.getElementById('modalContent');
-  let ph='';t.proveedores.forEach((p,i)=>{const d=t.descargas[i]||{};ph+=`<div style="margin:8px 0;padding:8px;background:#141428;border-radius:8px"><div style="font-weight:700;font-size:13px;color:#fff;margin-bottom:4px">${p}</div><div style="font-size:10px;color:#888;display:flex;gap:6px;flex-wrap:wrap">${CATEGORIES.map(c=>`<span>${c.short}: <b style="color:#fff">${d[c.id]||0}</b></span>`).join(' | ')}</div><div style="font-size:10px;margin-top:3px;color:#aaa">${d.gericht?'→ Gericht ':''}${d.bont?'→ BONT':''}</div></div>`;});
-  m.innerHTML=`<button class="close-modal" onclick="closeModal()">&times;</button><h3>🚛 Camión #${t.id}</h3><div style="font-size:12px;color:#888;margin-bottom:8px">Puerta ${t.puerta}${t.puerta2?' + '+t.puerta2:''} · 🔑 ${t.llave} · 🕐 ${t.llegada||'--:--'}</div>${ph}<div style="font-size:11px;color:#888;margin-top:8px">Firma encargado: <b style="color:#fff">${t.firma_encargado||'(pendiente)'}</b></div>${t.completado?'<div style="font-size:11px;color:#00e676;margin-top:4px">✅ Descarga completada</div>':''}${t.salida?'<div style="font-size:11px;color:#888;margin-top:4px">🕐 Salida: '+t.salida+' · 🔑 '+(t.llave_devuelta?'Devolvió llave':'Llave pendiente')+'</div>':''}${t.despachado?'<div style="font-size:11px;color:#00e676;margin-top:4px">✅ Despachado</div>':''}<button class="btn-primary" style="margin-top:10px" onclick="closeModal()">Cerrar</button>`;
-  document.getElementById('modalOverlay').classList.add('show');
-}
-function openDispatch(id){
-  const t=trucks[id];if(!t)return;
-  const m=document.getElementById('modalContent');
-  m.innerHTML=`<button class="close-modal" onclick="closeModal()">&times;</button>
-    <h3>🔑 Despachar camión #${t.id}</h3>
-    <p style="font-size:12px;color:#888;margin-bottom:10px">Registra salida y devolución de llave</p>
-    <div class="form-group" style="margin-bottom:8px"><label style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px">🔑 ¿Devolvió la llave ${t.llave}?</label>
-    <select id="keyReturned" style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#141428;color:#fff;font-size:14px;outline:none;margin-top:3px"><option value="si">Sí, devolvió la llave</option><option value="no">No, pendiente</option></select></div>
-    <div><div style="font-size:11px;color:#aaa;margin-bottom:4px">Firma del formulario:</div><input class="firma-input" id="firmaBo" placeholder="Tu nombre"><input class="firma-input" id="firmaDriver" placeholder="Nombre del conductor (mayúsculas)"></div>
-    <button class="btn-primary" id="btnConfirm">✅ CONFIRMAR DESPACHO</button>
-    <button class="btn-primary" style="background:#ff1744;margin-top:6px" onclick="closeModal()">Cancelar</button>`;
-  document.getElementById('modalOverlay').classList.add('show');
-  document.getElementById('btnConfirm').onclick=()=>{
-    t.salida=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    t.llave_devuelta=document.getElementById('keyReturned').value==='si';
-    t.despachado=true;
-    t.firma_bo=document.getElementById('firmaBo').value.trim()||'(pendiente)';
-    t.firma_driver=document.getElementById('firmaDriver').value.trim()||'(pendiente)';
-    const du={};du[t.puerta]='libre';if(t.puerta2)du[t.puerta2]='libre';
-    fetch(DB_URL+'/muelles/doors.json',{method:'PATCH',body:JSON.stringify(du)}).catch(()=>{});
-    trucks[id]=t;localStorage.setItem('baysyncv2_trucks',JSON.stringify(trucks));
-    if(navigator.onLine)fetch(DB_URL+'/camiones/'+id+'.json',{method:'PUT',body:JSON.stringify(t)}).catch(()=>{});
-    closeModal();renderTruckList();
-  };
-}
-function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
-function exportCSV(){
-  const rows=Object.values(trucks).filter(t=>t.fecha===dayDate);
-  if(!rows.length){alert('No hay datos');return;}
-  const h=['ID','Puerta','Proveedor','Llegada','Salida','Total min','Llave'];
-  CATEGORIES.forEach(c=>h.push(c.short));
-  h.push('Dirección','Firma Bo','Firma Driver');
-  const csv=rows.map(t=>t.proveedores.map((p,i)=>{
-    const d=t.descargas[i]||{};
-    let min='';if(t.llegada&&t.salida){const[l1,l2]=t.llegada.split(':').map(Number);const[s1,s2]=t.salida.split(':').map(Number);let m=s2+s1*60-(l2+l1*60);if(m<0)m+=1440;min=m;}
-    const dir=(d.gericht?'Gericht':'')+(d.gericht&&d.bont?'/':'')+(d.bont?'BONT':'');
-    return [t.id,t.puerta,p,t.llegada||'',t.salida||'',min,t.llave,...CATEGORIES.map(c=>d[c.id]||0),dir,t.firma_bo||'',t.firma_driver||''].join(';');
-  }).join('\n')).join('\n');
-  const blob=new Blob(['\ufeff'+[h.join(';'),csv].join('\n')],{type:'text/csv;charset=utf-8;'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Lostijden_BONT_'+dayDate+'.csv';a.click();URL.revokeObjectURL(a);
-}
-function startPoll(){
-  setInterval(async()=>{
-    try{const r=await fetch(DB_URL+'/muelles.json');const d=await r.json();if(d&&d.doors)renderDoors(d.doors);}catch(e){}
-  },2000);
-  setInterval(async()=>{
-    try{const r=await fetch(DB_URL+'/camiones.json');const d=await r.json();if(d){let c=false;
-      Object.entries(d).forEach(([k,v])=>{if(v&&v.activo&&(!trucks[k]||JSON.stringify(trucks[k])!==JSON.stringify(v))){trucks[k]=v;c=true;}});
-      if(c){localStorage.setItem('baysyncv2_trucks',JSON.stringify(trucks));renderTruckList();badge();}
-    }}catch(e){}
-  },3000);
-}
+function card(t,des){const p=t.proveedores.slice(0,3).join(', ')+(t.proveedores.length>3?' +'+(t.proveedores.length-3):''),ac=!des?`<div class="truck-act">${!t.completado?'<button class="btn-view btn-v" data-id="'+t.id+'">📋 Ver</button>':'<button class="btn-disp btn-d" data-id="'+t.id+'">🔑 Despachar</button>'}</div>`:'<div class="truck-act"><button class="btn-view btn-v" data-id="'+t.id+'">📋 Ver</button></div>';return `<div class="truck-card ${des?'despatched':''}"><div class="head"><div><span class="sb ${des?'sb-d':'sb-c'}">${des?'✅ Despachado':'🟡 En descarga'}</span></div><div class="id">#${t.id}</div></div><div class="door">🚪 ${t.puerta}${t.puerta2?' + '+t.puerta2:''}  ·  🔑 ${t.llave}</div><div class="prov">📦 ${p}</div><div class="time">🕐 Llegada: ${t.llegada||'--:--'}${t.salida?' · Salida: '+t.salida:''}</div>${ac}</div>`;}
+function openModal(id){const t=trucks[id];if(!t)return;const m=document.getElementById('modalContent');let ph='';t.proveedores.forEach((p,i)=>{const d=t.descargas[i]||{};ph+=`<div style="margin:8px 0;padding:8px;background:#141428;border-radius:8px"><div style="font-weight:700;font-size:13px;color:#fff;margin-bottom:4px">${p}</div><div style="font-size:10px;color:#888;display:flex;gap:6px;flex-wrap:wrap">${CAT.map(c=>`<span>${c.short}: <b style="color:#fff">${d[c.id]||0}</b></span>`).join(' | ')}</div><div style="font-size:10px;margin-top:3px;color:#aaa">${d.gericht?'→ Gericht ':''}${d.bont?'→ BONT':''}</div></div>`;});m.innerHTML=`<button class="close-modal" onclick="closeM()">&times;</button><h3>🚛 Camión #${t.id}</h3><div style="font-size:12px;color:#888;margin-bottom:8px">Puerta ${t.puerta}${t.puerta2?' + '+t.puerta2:''} · 🔑 ${t.llave} · 🕐 ${t.llegada||'--:--'}</div>${ph}<div style="font-size:11px;color:#888;margin-top:8px">Firma encargado: <b style="color:#fff">${t.firma_encargado||'(pendiente)'}</b></div>${t.completado?'<div style="font-size:11px;color:#00e676;margin-top:4px">✅ Descarga completada</div>':''}${t.salida?'<div style="font-size:11px;color:#888;margin-top:4px">🕐 Salida: '+t.salida+' · 🔑 '+(t.llave_devuelta?'Devolvió':'Pendiente')+'</div>':''}${t.despachado?'<div style="font-size:11px;color:#00e676;margin-top:4px">✅ Despachado</div>':''}<button class="btn-pri" style="margin-top:10px" onclick="closeM()">Cerrar</button>`;document.getElementById('modalOv').classList.add('show');}
+function openDisp(id){const t=trucks[id];if(!t)return;const m=document.getElementById('modalContent');m.innerHTML=`<button class="close-modal" onclick="closeM()">&times;</button><h3>🔑 Despachar camión #${t.id}</h3><p style="font-size:12px;color:#888;margin-bottom:10px">Registra la salida y devolución de llave</p><div class="form-group" style="margin-bottom:8px"><label style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px">🔑 ¿Devolvió la llave ${t.llave}?</label><select id="keyR" style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#141428;color:#fff;font-size:14px;outline:none;margin-top:4px"><option value="si">Sí, devolvió la llave</option><option value="no">No, pendiente</option></select></div><div><div style="font-size:11px;color:#aaa;margin-bottom:4px">Firma del formulario:</div><input class="firma-input" id="firmaBo" placeholder="Tu nombre"><input class="firma-input" id="firmaDriver" placeholder="Nombre del conductor (mayúsculas)"></div><button class="btn-pri" id="btnConf">✅ CONFIRMAR DESPACHO</button><button class="btn-pri" style="background:#ff1744;margin-top:6px" onclick="closeM()">Cancelar</button>`;document.getElementById('modalOv').classList.add('show');document.getElementById('btnConf').onclick=()=>{t.salida=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});t.llave_devuelta=document.getElementById('keyR').value==='si';t.despachado=true;t.firma_bo=document.getElementById('firmaBo').value.trim()||'(pendiente)';t.firma_driver=document.getElementById('firmaDriver').value.trim()||'(pendiente)';const du={};du[t.puerta]='libre';if(t.puerta2)du[t.puerta2]='libre';fetch(DB+'/muelles/doors.json',{method:'PATCH',body:JSON.stringify(du)}).catch(()=>{});trucks[id]=t;localStorage.setItem('baysyncv2_trucks',JSON.stringify(trucks));if(navigator.onLine)fetch(DB+'/camiones/'+id+'.json',{method:'PUT',body:JSON.stringify(t)}).catch(()=>{});closeM();renderT();};}
+function closeM(){document.getElementById('modalOv').classList.remove('show');}
+function expCSV(){const rows=Object.values(trucks).filter(t=>t.fecha===date);if(!rows.length){alert('No hay datos');return;}const h=['ID','Puerta','Proveedor','Llegada','Salida','Total min','Llave'];CAT.forEach(c=>h.push(c.short));h.push('Dirección','Firma Bo','Firma Driver');const csv=rows.map(t=>t.proveedores.map((p,i)=>{const d=t.descargas[i]||{};let min='';if(t.llegada&&t.salida){const[l1,l2]=t.llegada.split(':').map(Number);const[s1,s2]=t.salida.split(':').map(Number);let m=s2+s1*60-(l2+l1*60);if(m<0)m+=1440;min=m;}const dir=(d.gericht?'Gericht':'')+(d.gericht&&d.bont?'/':'')+(d.bont?'BONT':'');return[t.id,t.puerta,p,t.llegada||'',t.salida||'',min,t.llave,...CAT.map(c=>d[c.id]||0),dir,t.firma_bo||'',t.firma_driver||''].join(';')}).join('\n')).join('\n');const blob=new Blob(['\ufeff'+[h.join(';'),csv].join('\n')],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Lostijden_BONT_'+date+'.csv';a.click();URL.revokeObjectURL(a);}
+function poll(){setInterval(async()=>{try{const r=await fetch(DB+'/muelles.json');const d=await r.json();if(d&&d.doors)renderD(d.doors)}catch(e){}},2000);setInterval(async()=>{try{const r=await fetch(DB+'/camiones.json');const d=await r.json();if(d){let c=0;Object.entries(d).forEach(([k,v])=>{if(v&&v.activo&&(!trucks[k]||JSON.stringify(trucks[k])!==JSON.stringify(v))){trucks[k]=v;c=1}});if(c){localStorage.setItem('baysyncv2_trucks',JSON.stringify(trucks));renderT();badge()}}}catch(e){}},3000);}
 init();
 </script>
 </body>
