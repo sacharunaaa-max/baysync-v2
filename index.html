@@ -109,7 +109,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="form-card">
     <h3 id="regTitle"></h3>
     <div class="form-row">
-      <div class="form-group" style="min-width:65px"><label id="lblId"></label><input type="text" id="inpId" placeholder="" inputmode="numeric" maxlength="4"></div>
+      <div style="text-align:center;margin-bottom:6px">
+  <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px" id="lblNextId"></div>
+  <div style="font-size:56px;font-weight:800;color:#00e676;line-height:1.1;letter-spacing:4px" id="displayNextId">--</div>
+</div>
       <div class="form-group" style="min-width:70px"><label id="lblDoor"></label><select id="inpDoor"><option value="">-</option></select></div>
       <div class="form-group" style="min-width:60px"><label id="lblDoor2"></label><select id="inpDoor2"><option value="">-</option></select></div>
       <div class="form-group" style="min-width:60px"><label id="lblKey"></label><input type="text" id="inpKey" placeholder="" maxlength="6"></div>
@@ -149,8 +152,8 @@ const LANG={
     doorView:'📍 Vista en vivo · Actualizado desde almacén',
     libre:'🟢 Libre',ocupado:'🔴 Ocupado',parcial:'🟡 Parcial',
     regTitle:'📥 Registrar camión entrante',
-    lblId:'ID Conductor',lblDoor:'Puerta',lblDoor2:'2ª Puerta',lblKey:'🔑 Llave',
-    placeholderId:'01',placeholderKey:'B3',
+    lblNextId:'📋 PRÓXIMO ID',lblDoor:'Puerta',lblDoor2:'2ª Puerta',lblKey:'🔑 Llave',
+    placeholderKey:'B3',
     lblSuppliers:'Proveedores',addProv:'+ Agregar proveedor',
     lblMotivo:'⚠️ Motivo de espera (solo si va a espera)',
     noMotivo:'— Sin motivo —',
@@ -183,8 +186,8 @@ const LANG={
     doorView:'📍 Live view · Updated from warehouse',
     libre:'🟢 Free',ocupado:'🔴 Occupied',parcial:'🟡 Partial',
     regTitle:'📥 Register incoming truck',
-    lblId:'Driver ID',lblDoor:'Door',lblDoor2:'2nd Door',lblKey:'🔑 Key',
-    placeholderId:'01',placeholderKey:'B3',
+    lblNextId:'📋 NEXT ID',lblDoor:'Door',lblDoor2:'2nd Door',lblKey:'🔑 Key',
+    placeholderKey:'B3',
     lblSuppliers:'Suppliers',addProv:'+ Add supplier',
     lblMotivo:'⚠️ Wait reason (only if waiting)',
     noMotivo:'— No reason —',
@@ -217,8 +220,8 @@ const LANG={
     doorView:'📍 Live weergave · Bijgewerkt uit magazijn',
     libre:'🟢 Vrij',ocupado:'🔴 Bezet',parcial:'🟡 Gedeeltelijk',
     regTitle:'📥 Registreer binnenkomende vrachtwagen',
-    lblId:'Chauffeur ID',lblDoor:'Deur',lblDoor2:'2e Deur',lblKey:'🔑 Sleutel',
-    placeholderId:'01',placeholderKey:'B3',
+    lblNextId:'📋 VOLGENDE ID',lblDoor:'Deur',lblDoor2:'2e Deur',lblKey:'🔑 Sleutel',
+    placeholderKey:'B3',
     lblSuppliers:'Leveranciers',addProv:'+ Leverancier toevoegen',
     lblMotivo:'⚠️ Wachtreden (alleen bij wacht)',
     noMotivo:'— Geen reden —',
@@ -265,8 +268,8 @@ const DB='https://baysync-583a2-default-rtdb.europe-west1.firebasedatabase.app';
 const SUP=["Akzo Nobel Coatings","Akzo Belgie","Allibert","Batavia","Bison International","Black & Decker (NL)","Black & Decker (Ceva)","Brilliant AG","Calodar NV","Coram (Leadtimer)","Durieu","Eglo Verlichting Nederland BV","Electro Cirkel Retail B.V.","Electrolux Home Products","Eltra B.V. (Leadtimer)","EUROMAC","Gevavi Schoeisel B.V.","Gimeg Nederland BV","Graham & Brown","GROHE BELGIE NV/SA","GROHE NEDERLAND B.V.","Hansgrohe","Hugo Brennenstuhl","Karcher","Koopman International B.V.","Korver Holland B.V.","KPE Holland","LENCO","Lightmakers SNEL","LUCIDE","LUTEC","Makita Belgie N.V.","Makita Nederland B.V.","Martin Mathys","Mega Collections","Navstar","Noord West Nederland","Novatech NV","Pick Up International B.V.","Robert Bosch B.V.","Service Best International (Leadtimer)","SHI","Sigma Coatings","Signify Netherlands B.V.","Soudal N.V.","SPS de Steenbok","Suki International B.V.","Talen Tools","Tiger (Leadtimer)","Tristar Retouradres","V33 (DISTRILOG)","Van Loon Sealskin","Van Spijk Agenturen","Vepa Bins B.V.","Vliegenthart","Weber","Stipt","Vebon NV","Arvesta","Aqmos"].sort((a,b)=>a.localeCompare(b));
 const CAT=[{id:'pallet_euro',short:'Euro'},{id:'rcn',short:'RCN'},{id:'ww_pallet',short:'WW'},{id:'hplt',short:'HPLT'},{id:'rotom',short:'Rotom'},{id:'rolcontainer',short:'RCG'},{id:'colli',short:'Colli'},{id:'krat',short:'Krat'},{id:'rek',short:'Rek'}];
 const DOORS=[18,19,20,21,22,23,24,25,26];
-const DAY_KEY='***',TRUCK_KEY='baysyncv2_trucks',LANG_KEY='baysyncv2_lang';
-let cl='es',open=false,date=null,trucks={},pCnt=1,doorsState={};
+const DAY_KEY='***',TRUCK_KEY='baysyncv2_trucks',LANG_KEY='baysyncv2_lang',NEXT_KEY='baysyncv2_nextid';
+let cl='es',open=false,date=null,trucks={},pCnt=1,doorsState={},nextId=1;
 
 // ============================ t() ============================
 function tl(key){const o=LANG[cl];return o?o[key]||key:key}
@@ -279,7 +282,6 @@ function applyLang(){
   const tabs=t('tabs');
   document.getElementById('tabBar').innerHTML=tabs.map((l,i)=>`<button class="tab-btn${i===0?' active':''}" data-t="${['muelles','registro','espera','curso'][i]}" onclick="switchTab('${['muelles','registro','espera','curso'][i]}')">${l}${i===2?' <span class="badge" id="badgeE">0</span>':''}${i===3?' <span class="badge" id="badgeC">0</span>':''}</button>`).join('');
   document.getElementById('regTitle').textContent=t('regTitle');
-  document.getElementById('lblId').textContent=t('lblId');document.getElementById('inpId').placeholder=t('placeholderId');
   document.getElementById('lblDoor').textContent=t('lblDoor');document.getElementById('lblDoor2').textContent=t('lblDoor2');
   document.getElementById('lblKey').textContent=t('lblKey');document.getElementById('inpKey').placeholder=t('placeholderKey');
   document.getElementById('lblSuppliers').textContent=t('lblSuppliers');document.getElementById('btnAddProv').textContent=t('addProv');
@@ -291,7 +293,8 @@ function applyLang(){
   document.getElementById('btnDescarga').textContent=t('btnDescarga');
   document.getElementById('btnEspera').textContent=t('btnEspera');
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===cl));
-  renderD(doorsState);renderW();renderT();
+  if(document.getElementById('lblNextId'))document.getElementById('lblNextId').textContent=t('lblNextId');
+  updNextId();renderD(doorsState);renderW();renderT();
   if(currentTab)switchTab(currentTab,true);
 }
 let currentTab='muelles';
@@ -307,6 +310,7 @@ function init(){
   try{const s=localStorage.getItem(LANG_KEY);if(s)cl=s;}catch(e){}
   try{const s=localStorage.getItem(DAY_KEY);if(s){const d=JSON.parse(s);open=d.open;date=d.date}}catch(e){}
   try{const s=localStorage.getItem(TRUCK_KEY);trucks=s?JSON.parse(s):{}}catch(e){}
+  try{const s=localStorage.getItem(NEXT_KEY);if(s)nextId=parseInt(s)||1}catch(e){}
   const s1=document.getElementById('inpDoor'),s2=document.getElementById('inpDoor2');
   DOORS.forEach(d=>{s1.innerHTML+=`<option value="${d}">${d}</option>`;s2.innerHTML+=`<option value="${d}">${d}</option>`});
   setupProv();
@@ -319,7 +323,7 @@ function init(){
 
 function setupProv(){
   document.getElementById('btnAddProv').onclick=()=>addP();addP();
-  document.getElementById('inpId').oninput=chk;document.getElementById('inpDoor').onchange=chk;document.getElementById('inpKey').oninput=chk;
+  document.getElementById('inpDoor').onchange=chk;document.getElementById('inpKey').oninput=chk;
 }
 function addP(v){
   const c=document.getElementById('provList'),idx=pCnt++;const r=document.createElement('div');r.className='prov-row';
@@ -333,13 +337,13 @@ function addP(v){
 }
 function rmP(b){b.closest('.prov-row').remove();chk();}
 function chk(){
-  const id=document.getElementById('inpId').value.trim(),keys=document.getElementById('inpKey').value.trim(),
+  const keys=document.getElementById('inpKey').value.trim(),
     hasProv=[...document.querySelectorAll('.pa')].some(p=>p.value.trim()),hasDoor=document.getElementById('inpDoor').value;
-  document.getElementById('btnDescarga').disabled=!(open&&id&&hasProv&&hasDoor&&keys);
-  document.getElementById('btnEspera').disabled=!(open&&id&&hasProv);
+  document.getElementById('btnDescarga').disabled=!(open&&hasProv&&hasDoor&&keys);
+  document.getElementById('btnEspera').disabled=!(open&&hasProv);
 }
 async function regT(espera){
-  const id=document.getElementById('inpId').value.trim().padStart(2,'0');
+  const id=String(nextId).padStart(2,'0'); nextId++;
   const puerta=espera?null:parseInt(document.getElementById('inpDoor').value);
   const puerta2=!espera&&document.getElementById('inpDoor2').value?parseInt(document.getElementById('inpDoor2').value):null;
   const llave=document.getElementById('inpKey').value.trim();
@@ -356,7 +360,8 @@ async function regT(espera){
   if(navigator.onLine)try{await fetch(DB+'/camiones/'+id+'.json',{method:'PUT',body:JSON.stringify(truck)})}catch(e){}
   trucks[id]=truck;saveT();renderW();renderT();badges();
   if(!espera){const du={};du[puerta]='ocupado';if(puerta2)du[puerta2]='ocupado';try{await fetch(DB+'/muelles/doors.json',{method:'PATCH',body:JSON.stringify(du)})}catch(e){}}
-  document.getElementById('inpId').value='';document.getElementById('inpDoor').value='';document.getElementById('inpDoor2').value='';document.getElementById('inpKey').value='';document.getElementById('inpMotivo').value='';document.getElementById('provList').innerHTML='';pCnt=0;addP();chk();
+  saveNext();updNextId();
+  document.getElementById('inpDoor').value='';document.getElementById('inpDoor2').value='';document.getElementById('inpKey').value='';document.getElementById('inpMotivo').value='';document.getElementById('provList').innerHTML='';pCnt=0;addP();chk();
 }
 
 // ============================ DOORS ============================
@@ -371,7 +376,7 @@ function updDay(){
   if(open){ds.className='day-status open';ds.textContent=t('dayOpen')+' — '+date;dd.textContent='';}
   else{ds.className='day-status closed';ds.textContent=t('dayClosed');dd.textContent=t('dayStart');}
 }
-function openDay(){const t2=new Date().toISOString().split('T')[0];open=true;date=t2;saveD();updDay();fetch(DB+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:true,fecha:t2})}).catch(()=>{});chk();}
+function openDay(){const t2=new Date().toISOString().split('T')[0];open=true;date=t2;nextId=1;saveD();saveNext();updDay();updNextId();fetch(DB+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:true,fecha:t2,contador:1})}).catch(()=>{});chk();}
 function closeDay(){open=false;saveD();updDay();fetch(DB+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:false,fecha:date})}).catch(()=>{});document.getElementById('btnDescarga').disabled=true;document.getElementById('btnEspera').disabled=true;}
 function openSettings(){
   const m=document.getElementById('modalContent');
@@ -387,6 +392,8 @@ function openSettings(){
 function saveD(){localStorage.setItem(DAY_KEY,JSON.stringify({open,date}))}
 function saveT(){localStorage.setItem(TRUCK_KEY,JSON.stringify(trucks))}
 function badges(){const bE=document.getElementById('badgeE'),bC=document.getElementById('badgeC');if(bE)bE.textContent=Object.values(trucks).filter(t=>t.espera).length;if(bC)bC.textContent=Object.values(trucks).filter(t=>t.activo&&!t.despachado).length;}
+function updNextId(){const el=document.getElementById('displayNextId');if(el)el.textContent=open?String(nextId).padStart(2,'0'):'--';}
+function saveNext(){localStorage.setItem(NEXT_KEY,String(nextId))}
 
 // ============================ ESPERA ============================
 function renderW(){

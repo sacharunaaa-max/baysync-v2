@@ -75,6 +75,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <img class="logo-hdr intergamma" src="intergamma-logo.svg" alt="Intergamma">
   <div class="brand" id="brandTitle">📋 <span>BaySync</span> · Almacén</div>
   <div style="display:flex;gap:2px;align-items:center">
+    <button class="settings-btn" onclick="openSettings()" id="settingsBtn" title="Ajustes">⚙️</button>
     <div class="conn-stat"><span class="sdot off" id="sD"></span><span id="sT">---</span></div>
     <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
     <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
@@ -113,7 +114,16 @@ const LANG={
     sendOk:'✅ Descarga # enviada',firmAlert:'Firma tu nombre',
     badgeLabel:'Tocar',
     online:'En vivo',syncing:'Enviando...',ok:'OK',
-    truckAct:'📦 Camiones'},
+    truckAct:'📦 Camiones',
+    settingsTitle:'⚙️ Ajustes',openBtn:'▶ Abrir día',closeBtn:'■ Cerrar día',
+    exportBtn:'⬇ Exportar CSV',
+    dayConfirmOpen:'¿Abrir un nuevo día? Se borrará el día anterior.',
+    dayConfirmClose:'¿Cerrar el día?',
+    dayOpen:'🟢 Día abierto',dayClosed:'🔴 Día cerrado',
+    dayStart:'Sin día activo',encargadoName:'Tu nombre',
+    encargadoPlace:'Nombre del encargado',saveName:'💾 Guardar nombre',
+    noData:'No hay datos',close:'Cerrar',
+    noTrucks:'No hay camiones hoy',selectReason:'Selecciona un motivo'},
   en:{title:'📋 BaySync · Warehouse',brand:'📋 <span>BaySync</span> · Warehouse',
     tabs:['🚪 Doors','📦 Trucks'],
     libre:'🟢 Free',ocupado:'🔴 Occupied',parcial:'🟡 Partial',
@@ -130,7 +140,16 @@ const LANG={
     sendOk:'✅ Download # sent',firmAlert:'Sign your name',
     badgeLabel:'Tap',
     online:'Online',syncing:'Sending...',ok:'OK',
-    truckAct:'📦 Trucks'},
+    truckAct:'📦 Trucks',
+    settingsTitle:'⚙️ Settings',openBtn:'▶ Open day',closeBtn:'■ Close day',
+    exportBtn:'⬇ Export CSV',
+    dayConfirmOpen:'Open a new day? Previous day data will be cleared.',
+    dayConfirmClose:'Close the day?',
+    dayOpen:'🟢 Day open',dayClosed:'🔴 Day closed',
+    dayStart:'No active day',encargadoName:'Your name',
+    encargadoPlace:'Warehouse employee name',saveName:'💾 Save name',
+    noData:'No data',close:'Close',
+    noTrucks:'No trucks today',selectReason:'Select a reason'},
   nl:{title:'📋 BaySync · Magazijn',brand:'📋 <span>BaySync</span> · Magazijn',
     tabs:['🚪 Deuren','📦 Vrachtwagens'],
     libre:'🟢 Vrij',ocupado:'🔴 Bezet',parcial:'🟡 Gedeeltelijk',
@@ -147,14 +166,23 @@ const LANG={
     sendOk:'✅ Lossing # verzonden',firmAlert:'Onderteken uw naam',
     badgeLabel:'Tik',
     online:'Online',syncing:'Verzenden...',ok:'OK',
-    truckAct:'📦 Vrachtwagens'}
+    truckAct:'📦 Vrachtwagens',
+    settingsTitle:'⚙️ Instellingen',openBtn:'▶ Dag openen',closeBtn:'■ Dag sluiten',
+    exportBtn:'⬇ CSV exporteren',
+    dayConfirmOpen:'Een nieuwe dag openen? Vorige dag wordt gewist.',
+    dayConfirmClose:'Dag sluiten?',
+    dayOpen:'🟢 Dag open',dayClosed:'🔴 Dag gesloten',
+    dayStart:'Geen actieve dag',encargadoName:'Uw naam',
+    encargadoPlace:'Naam magazijnmedewerker',saveName:'💾 Naam opslaan',
+    noData:'Geen gegevens',close:'Sluiten',
+    noTrucks:'Geen vrachtwagens vandaag',selectReason:'Selecteer een reden'}
 };
 // ============================ STATE ============================
 const DB='https://baysync-583a2-default-rtdb.europe-west1.firebasedatabase.app';
 const CATEGORIES=[{id:'pallet_euro',short:'Euro'},{id:'rcn',short:'RCN'},{id:'ww_pallet',short:'WW'},{id:'hplt',short:'HPLT'},{id:'rotom',short:'Rotom'},{id:'rolcontainer',short:'RCG'},{id:'colli',short:'Colli'},{id:'krat',short:'Krat'},{id:'rek',short:'Rek'}];
 const DOORS=[18,19,20,21,22,23,24,25,26];
-const DK='baysyncv2_doors_enc',TK='baysyncv2_trucks',LK='baysyncv2_lang';
-let cl='es',doors={},dirty=0,lastSent=null,trucks={},curTab='muelles',curTruck=null;
+const DK='baysyncv2_doors_enc',TK='baysyncv2_trucks',LK='baysyncv2_lang',ENC_KEY='baysyncv2_encargado';
+let cl='es',doors={},dirty=0,lastSent=null,trucks={},curTab='muelles',curTruck=null,encargado='',dayOpen=false,dayDate='';
 
 function tl(key){const o=LANG[cl];return o?o[key]||key:key}
 function t(key,...vals){let s=tl(key);vals.forEach((v,i)=>s=s.replace('{'+i+'}',v));return s}
@@ -181,6 +209,7 @@ function init(){
   try{const s=localStorage.getItem(LK);if(s)cl=s;}catch(e){}
   try{const s=localStorage.getItem(DK);doors=s?JSON.parse(s):{};Object.keys(doors).length||loadDef()}catch(e){loadDef()}
   try{const s=localStorage.getItem(TK);trucks=s?JSON.parse(s):{}}catch(e){}
+  try{const s=localStorage.getItem(ENC_KEY);if(s)encargado=s;}catch(e){}
   renderD();updBtn();renderT();poll();applyLang();
   document.getElementById('btnSend').onclick=()=>{if(dirty)sendD();};}
 function loadDef(){doors={};DOORS.forEach(d=>doors[d]='libre');svD()}
@@ -210,7 +239,7 @@ function tcard(tk,d){const p=tk.proveedores.slice(0,2).join(', ')+(tk.proveedore
 
 function openF(tk){curTruck=JSON.parse(JSON.stringify(tk));const m=document.getElementById('modalContent');let h=`<button class="close-modal" onclick="closeM()">&times;</button><h3>🚛 ${t('modalTitle')} #${tk.id} · ${t('modalPuerta')} ${tk.puerta}</h3><p style="font-size:10px;color:#888;margin-bottom:6px">🕐 ${tk.llegada||'--:--'} · 🔑 ${tk.llave}</p>`;
   tk.proveedores.forEach((p,i)=>{const d=curTruck.descargas[i]||{};h+=`<div class="prov-section"><h4>📦 ${p}</h4><div style="display:flex;gap:4px;margin-bottom:4px"><button class="dir-btn ${d.gericht?'active':''}" onclick="tDir(${i},'gericht')">${t('dirGericht')}</button><button class="dir-btn ${d.bont?'active':''}" onclick="tDir(${i},'bont')">${t('dirBONT')}</button></div><div class="qty-grid">${CATEGORIES.map(c=>`<div class="qty-item"><label>${c.short}</label><input type="number" min="0" value="${d[c.id]||0}" oninput="upQ(${i},'${c.id}',this.value)"></div>`).join('')}</div></div>`;});
-  h+=`<div style="margin:6px 0"><div style="font-size:10px;color:#aaa;margin-bottom:3px">${t('firmaLabel')}:</div><input class="firma-input" id="firmInp" placeholder="${t('firmaPlace')}" value="${tk.firma_encargado||''}"></div><button class="btn-pri btn-grn" onclick="subD()">${t('subBtn')}</button><button class="btn-pri btn-redd" onclick="closeM()">${t('cancel')}</button>`;
+  h+=`<div style="margin:6px 0"><div style="font-size:10px;color:#aaa;margin-bottom:3px">${t('firmaLabel')}:</div><input class="firma-input" id="firmInp" placeholder="${t('firmaPlace')}" value="${tk.firma_encargado||encargado}"></div><button class="btn-pri btn-grn" onclick="subD()">${t('subBtn')}</button><button class="btn-pri btn-redd" onclick="closeM()">${t('cancel')}</button>`;
   m.innerHTML=h;document.getElementById('modalOv').classList.add('show');}
 function tDir(i,dir){if(!curTruck||!curTruck.descargas[i])return;curTruck.descargas[i][dir]=!curTruck.descargas[i][dir];}
 function upQ(i,c,v){if(curTruck&&curTruck.descargas[i])curTruck.descargas[i][c]=parseInt(v)||0;}
@@ -221,7 +250,44 @@ async function subD(){if(!curTruck)return;const f=document.getElementById('firmI
   if(navigator.onLine)try{await fetch(DB+'/camiones/'+curTruck.id+'.json',{method:'PUT',body:JSON.stringify(curTruck)})}catch(e){}
   closeM();renderT();document.getElementById('modalContent').innerHTML=`<div class="send-ok">${t('sendOk')} #${curTruck.id}</div>`;document.getElementById('modalOv').classList.add('show');setTimeout(()=>document.getElementById('modalOv').classList.remove('show'),2000);}
 
+function openSettings(){
+  const m=document.getElementById('modalContent');
+  m.innerHTML=`<button class="close-modal" onclick="closeM()">&times;</button>
+    <h3>⚙️ ${t('settingsTitle')}</h3>
+    <div style="font-size:11px;color:#888;margin-bottom:8px">${dayOpen?t('dayOpen')+' — '+dayDate:t('dayClosed')}</div>
+    <button class="btn-pri btn-grn" onclick="closeM();encOpenDay()">${t('openBtn')}</button>
+    <button class="btn-pri btn-redd" onclick="closeM();encCloseDay()">${t('closeBtn')}</button>
+    <button class="btn-pri" style="background:#333" onclick="closeM();expCSV()">${t('exportBtn')}</button>
+    <hr style="border:none;border-top:1px solid #333;margin:10px 0">
+    <div style="font-size:11px;color:#aaa;margin-bottom:4px">${t('encargadoName')}:</div>
+    <input class="firma-input" id="encNameInp" placeholder="${t('encargadoPlace')}" value="${encargado}">
+    <button class="btn-pri btn-grn" onclick="saveEnc()">${t('saveName')}</button>
+    <button class="btn-pri" style="background:#333;margin-top:10px" onclick="closeM()">${t('close')}</button>`;
+  document.getElementById('modalOv').classList.add('show');
+}
+function saveEnc(){
+  const v=document.getElementById('encNameInp').value.trim();
+  if(v){encargado=v;localStorage.setItem(ENC_KEY,v);closeM();}
+}
+function encOpenDay(){
+  if(!confirm(t('dayConfirmOpen')))return;
+  dayOpen=true;dayDate=new Date().toISOString().split('T')[0];
+  fetch(DB+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:true,fecha:dayDate,contador:1})}).catch(()=>{});
+}
+function encCloseDay(){
+  if(!confirm(t('dayConfirmClose')))return;
+  dayOpen=false;
+  fetch(DB+'/dia.json',{method:'PUT',body:JSON.stringify({abierto:false,fecha:dayDate})}).catch(()=>{});
+}
+function expCSV(){
+  const rows=Object.values(trucks).filter(t=>!t.espera);
+  if(!rows.length){alert(t('noData'));return;}
+  const h=['ID','Puerta','Proveedor','Llegada','Salida','Total min','Llave'];CATEGORIES.forEach(c=>h.push(c.short));h.push('Dirección','Firma Bo','Firma Driver');
+  const csv=rows.map(t=>t.proveedores.map((p,i)=>{const d=t.descargas[i]||{};let min='';if(t.llegada&&t.salida){const[l1,l2]=t.llegada.split(':').map(Number);const[s1,s2]=t.salida.split(':').map(Number);let m=s2+s1*60-(l2+l1*60);if(m<0)m+=1440;min=m;}const dir=(d.gericht?'Gericht':'')+(d.gericht&&d.bont?'/':'')+(d.bont?'BONT':'');return[t.id,t.puerta,p,t.llegada||'',t.salida||'',min,t.llave,...CATEGORIES.map(c=>d[c.id]||0),dir,t.firma_bo||'',t.firma_driver||''].join(';')}).join('\n')).join('\n');
+  const blob=new Blob(['\ufeff'+[h.join(';'),csv].join('\n')],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Lostijden_BONT_'+dayDate+'.csv';a.click();URL.revokeObjectURL(a);
+}
 function poll(){
+  setInterval(async()=>{try{const r=await fetch(DB+'/dia.json');const d=await r.json();if(d){dayOpen=d.abierto||false;dayDate=d.fecha||'';}}catch(e){}},5000);
   setInterval(async()=>{try{const r=await fetch(DB+'/muelles.json');const d=await r.json();if(d&&d.doors&&!dirty){doors=d.doors;svD();renderD();updBtn()}}catch(e){}},3000);
   setInterval(async()=>{try{const r=await fetch(DB+'/camiones.json');const d=await r.json();if(d){let c=0;Object.entries(d).forEach(([k,v])=>{if(v&&v.activo&&!v.despachado&&(!trucks[k]||JSON.stringify(trucks[k].descargas)!==JSON.stringify(v.descargas)||trucks[k].completado!==v.completado)){trucks[k]=v;c=1}});Object.keys(trucks).forEach(k=>{if(!d[k]||d[k].despachado){delete trucks[k];c=1}});if(c){localStorage.setItem(TK,JSON.stringify(trucks));badge();renderT()}}}catch(e){}setS('on',t('online'));},3000);}
 init();
